@@ -13,7 +13,7 @@
     html, body {
       height: 100%;
       margin: 0;
-      background: #000;       /* ✅ 검은 배경 */
+      background: #000;       
       overflow: hidden;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
       user-select: none;
@@ -56,7 +56,6 @@
         0 6px 14px rgba(0,0,0,0.55);
     }
 
-    /* 카드 느낌(원하면 이미지로 교체 가능) */
     .card::before {
       content: "";
       position: absolute;
@@ -74,7 +73,6 @@
     .skin-gray  { background: linear-gradient(180deg, #a3a9a6 0%, #7f8784 100%); }
     .skin-dark  { background: linear-gradient(180deg, #2a2f33 0%, #202427 100%); }
 
-    /* ✅ 맨 앞 카드만 포인터 가능 */
     .card { pointer-events: none; }
     .card.is-front { pointer-events: auto; cursor: grab; }
     .card.is-front:active { cursor: grabbing; }
@@ -90,12 +88,10 @@
 (() => {
   const deckEl = document.getElementById("deck");
 
-  // 카드 5장(원하면 늘려도 됨)
   const skins = ["skin-dark","skin-cream","skin-gray","skin-dark","skin-cream"];
 
-  // 뒤 카드(덱) 부채꼴 배치
   const FAN = [
-    { x: 0,   y: 26,   rz: 0,   z: 50 },   // front base
+    { x: 0,   y: 26,   rz: 0,   z: 50 },   
     { x: -54, y: -68,  rz: -18, z: 40 },
     { x: -84, y: -86,  rz: -26, z: 30 },
     { x: -112,y: -98,  rz: -34, z: 20 },
@@ -113,15 +109,14 @@
   const SPRING = 0.14;
   const DAMP   = 0.80;
 
-  // state
   let order = skins.map((skin, i) => ({ id: i, skin }));
-  let cardEls = [];                 // DOM 카드들(항상 유지)
+  let cardEls = [];                
   let dragging = false;
   let animatingOut = false;
 
   let startX = 0, startY = 0;
-  let dragX = 0, dragY = 0;         // 목표
-  let curX = 0, curY = 0;           // 현재
+  let dragX = 0, dragY = 0;        
+  let curX = 0, curY = 0;           
   let velX = 0, velY = 0;
 
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
@@ -177,7 +172,6 @@
   }
 
   function tick() {
-    // 스프링 보간
     const ax = (dragX - curX) * SPRING;
     const ay = (dragY - curY) * SPRING;
 
@@ -193,7 +187,6 @@
 
   function snapBack() {
     dragX = 0; dragY = 0;
-    // 덱 위치 복귀 애니메이션
     renderDeck(false);
   }
 
@@ -215,30 +208,25 @@
        rotateX(10deg) rotateY(${dir * 46}deg) rotateZ(${dir * 34}deg)`;
 
     front.addEventListener("transitionend", () => {
-      // ✅ 맨 앞 카드 → 맨 뒤로 보내기 (무한 덱)
       const first = order.shift();
       order.push(first);
 
-      // 상태 리셋
       dragX = dragY = 0;
       curX = curY = 0;
       velX = velY = 0;
 
       animatingOut = false;
 
-      // DOM 재생성(가장 확실하게 버그 방지)
       build();
     }, { once: true });
   }
 
-  // ✅ 이벤트는 덱에 한 번만 걸고, 항상 맨 앞 카드만 반응하게
   deckEl.addEventListener("pointerdown", (e) => {
     if (animatingOut) return;
 
     const front = cardEls[0];
     if (!front) return;
 
-    // 맨 앞 카드가 아닌 곳을 누르면 무시
     if (e.target !== front) return;
 
     dragging = true;
@@ -264,7 +252,6 @@
 
     if (Math.abs(dragX) > SWIPE_X) {
       const dir = dragX > 0 ? 1 : -1;
-      // 다음 카드 준비용 덱 재배치
       renderDeck(false);
       flyOut(dir);
       return;
@@ -272,7 +259,6 @@
     snapBack();
   });
 
-  // init
   build();
   requestAnimationFrame(tick);
 })();
